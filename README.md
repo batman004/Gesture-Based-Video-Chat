@@ -5,7 +5,6 @@
 This is a gesture based video chat web app that uses [Agora.io](https://www.agora.io) to set up a WebRTC interface, similar to Google Hangouts, Skype or whichever other video chat platform you prefer, but with the twist of Machine Learning! I have added gesture based control with uses a pre-trained model called PoseNet,for running real-time pose estimation in the browser using TensorFlow.js, and accordingly trigerring the call functions such as mute, unmute, camON and camOff
 ## Pre Requisites
 - [A simple web server](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server)
-- An SSL certificate or way to have an https connection (I use [ngrok](https://ngrok.com))
 - A developer account with [Agora.io](https://www.agora.io)
 - An understanding of HTML/CSS/JS 
 - A basic understanding of how PoseNet functions work 
