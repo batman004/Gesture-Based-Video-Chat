@@ -1,4 +1,7 @@
 // UI buttons
+
+let gesture_toggle = false
+
 function enableUiControls(localStream) {
 
     $("#mic-btn").prop("disabled", false);
@@ -51,16 +54,18 @@ function enableUiControls(localStream) {
   }
 
   function toggleGesture() {
-    toggleBtn($("#gesture-btn")); // toggle button colors
-    $("#gesture-icon").toggleClass('fas fa-american-sign-language-interpreting').toggleClass('fad fa-american-sign-language-interpreting'); // toggle the mic icon
-    if ($("#gesture-icon").hasClass('fas fa-american-sign-language-interpreting')) {
+    $("#gesture-icon").toggleClass('fad fa-american-sign-language-interpreting').toggleClass('fas fa-american-sign-language-interpreting'); 
+    if ($("#gesture-icon").hasClass('fad fa-american-sign-language-interpreting')) {
       init(); // fire up the pose.js script
+      gesture_toggle = true
 
     } else {
       pause(); //stop the posenet model
 
     }
   }
+
+
   
   function toggleVideo(localStream) {
     toggleBtn($("#video-btn")); // toggle button colors

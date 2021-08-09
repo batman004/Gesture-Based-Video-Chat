@@ -4,12 +4,12 @@
 
 // video profile settings
 
+
 var cameraVideoProfile = '480p_4'; // 640 × 480 @ 30fps  & 750kbs
 var screenVideoProfile = '480p_2'; // 640 × 480 @ 30fps
 
 // create client instances for camera (client) 
 var client = AgoraRTC.createClient({mode: 'rtc', codec: 'vp8'}); 
-
 
 // stream references (keep track of active streams) 
 var remoteStreams = {}; // remote streams obj struct [id : stream] 
@@ -40,19 +40,21 @@ function initClientAndJoinChannel(agoraAppId, token, channelName, uid) {
   });
 }
 
+// Local client added to call
 
 client.on('stream-published', function (evt) {
   console.log("Publish local stream successfully");
 });
 
-// connect remote streams
+// connect remote streams (addding other users )
+
 client.on('stream-added', function (evt) {
   var stream = evt.stream;
   var streamId = stream.getId();
   console.log("new stream added: " + streamId);
   // Check if the stream is local
   if (streamId != localStreams.screen.id) {
-    console.log('subscribe to remote stream:' + streamId);
+    console.log('subscribed to remote stream:' + streamId);
     // Subscribe to the stream.
     client.subscribe(stream, function (err) {
       console.log("[ERROR] : subscribe stream failed", err);
@@ -77,12 +79,20 @@ client.on('stream-subscribed', function (evt) {
     addRemoteStreamMiniView(remoteStreams[mainStreamId]); // send the main video stream to a container
     // set the screen-share as the main 
     mainStreamId = remoteId;
-    remoteStream.play('full-screen-video');s
+    remoteStream.play('full-screen-video');
   } else {
     client.setRemoteVideoStreamType(remoteStream, 1); // subscribe to the low stream
     addRemoteStreamMiniView(remoteStream);
   }
 });
+
+// check if local video is present , then check id and console log
+
+// if($('local-video')){
+//   alert($('local-video').children())
+
+// }
+
 
 // remove the remote-container when a user leaves the channel
 client.on("peer-leave", function(evt) {
@@ -145,7 +155,7 @@ function createCameraStream(uid) {
     streamID: uid,
     audio: true,
     video: true,
-    screen: false
+    // screen: false
   });
   localStream.setVideoProfile(cameraVideoProfile);
   localStream.init(function() {
@@ -164,6 +174,8 @@ function createCameraStream(uid) {
     console.log("[ERROR] : getUserMedia failed", err);
   });
 }
+
+// check if stream exists and then run pose.js on it 
 
 // REMOTE STREAMS UI
 function addRemoteStreamMiniView(remoteStream){
@@ -216,3 +228,7 @@ function leaveChannel() {
     console.log("client leave failed ", err); //error handling
   });
 }
+
+
+
+// id="local-video" local video creation div
