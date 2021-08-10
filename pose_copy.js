@@ -2,27 +2,10 @@
 // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/pose
 
 // the link to your model provided by Teachable Machine export panel
-
-
-
 const URL = "https://teachablemachine.withgoogle.com/models/515-mqdK-/";
 let model, webcam, ctx, labelContainer, maxPredictions;
 
 let run=false
-
-// check if video cam is on and window already created.
-// then access video stream and pass into predict
-// if confidence level of a particlar class >0.85, trigger function
-
-// var mic = document.getElementById("wakeUpAudio");
-function mutemic() { 
-    localStream.muteAudio()
- }
-function unmutemic() { 
-    localStream.unmuteAudio();
- }
-
-
 
 async function init() {
 
@@ -41,13 +24,13 @@ async function init() {
     webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
     await webcam.setup(); // request access to the webcam
     await webcam.play();
-    // window.requestAnimationFrame(loop);
+    window.requestAnimationFrame(loop);
 
     // change this (use frame instead of canvas ) take ss and run w frame 
 
     // append/get elements to the DOM
-    const canvas = document.getElementById("player_1001");
-    canvas.width = 200; canvas.height = 200;
+    const canvas = document.getElementById("canvas");
+    canvas.width = size; canvas.height = size;
     ctx = canvas.getContext("2d");
     labelContainer = document.getElementById("label-container");
     for (let i = 0; i < maxPredictions; i++) { // and class labels
@@ -55,24 +38,19 @@ async function init() {
     }
 }
 
-
-//no need
-// async function loop(timestamp) {
-//     webcam.update(); // update the webcam frame
-//     await predict();
-//     window.requestAnimationFrame(loop);
-// }
+async function loop(timestamp) {
+    webcam.update(); // update the webcam frame
+    await predict();
+    window.requestAnimationFrame(loop);
+}
 
 async function predict() {
     // Prediction #1: run input through posenet
     // estimatePose can take in an image, video or canvas html element
-
-    // pass doc by elelement instead
     const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
     // Prediction 2: run input through teachable machine classification model
     const prediction = await model.predict(posenetOutput);
-
-    // create switchcase from posenet op 
+   // create switchcase from posenet op 
 
     // trigger functions based on op's 
 
@@ -82,14 +60,7 @@ async function predict() {
         const classPrediction =
             prediction[i].className + ": " + prediction[i].probability.toFixed(2);
         labelContainer.childNodes[i].innerHTML = classPrediction;
-    
-     // don't play audio when head's neutral with probability >= 75%
-    if (prediction[2].probability.toFixed(2) >= 0.75)
-        mutemic();
-    // else
-    //     unmutemic();
     }
-
 
     // finally draw the poses
     drawPose(pose);
@@ -98,6 +69,7 @@ async function predict() {
 // function to pause the gesture control
 function pause(){
 
+    // await webcam.setup();
     webcam.stop()
 
 }
@@ -113,3 +85,5 @@ function drawPose(pose) {
         }
     }
 }
+
+ 
