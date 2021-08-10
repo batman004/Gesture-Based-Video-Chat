@@ -1,8 +1,18 @@
 #buttons-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin: 1rem;
+
+}
+
+
+/* #buttons-container {
     position: absolute;
     z-index: 2;  
     width: 100vw;
-  }
+  } */
   
   #full-screen-video {
     position: absolute;

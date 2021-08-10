@@ -183,10 +183,7 @@ function createCameraStream(uid) {
     console.log("[ERROR] : getUserMedia failed", err);
   });
 
-
-
 }
-
 
 
 // check if stream exists and then run pose.js on it 

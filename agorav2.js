@@ -1,6 +1,6 @@
-// url for hosted pre-trained machine learning model
-const URL = "https://teachablemachine.withgoogle.com/models/515-mqdK-/";
-let model, webcam, ctx, labelContainer, maxPredictions;
+
+var cameraVideoProfile = '480p_4'; // 640 × 480 @ 30fps  & 750kbs
+var screenVideoProfile = '480p_2'; // 640 × 480 @ 30fps
 
 // global variables for accessing videostream
 
