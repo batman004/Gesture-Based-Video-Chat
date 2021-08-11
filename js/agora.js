@@ -89,12 +89,13 @@ client.on('stream-subscribed', function (evt) {
   }
 });
 
-// check if local video is present , then check id and console log
-
-// if($('local-video')){
-//   alert($('local-video').children())
-
+// function getUserVideo() {
+//   return navigator.mediaDevices.getUserMedia({
+//     video: true,
+//     audio: false,
+//   });
 // }
+
 
 
 // remove the remote-container when a user leaves the channel
@@ -169,10 +170,7 @@ function createCameraStream(uid) {
     //take shared variable herer global stream = localstream   ref for local stream 
     globalStream=localStream;
 
-    // console.log("YPPPPP" + globalStream.video)
 
-    // console.log("YPPPPP" + localStream.video)
-    // publish local stream
     client.publish(localStream, function (err) {
       console.log("[ERROR] : publish local stream error: " + err);
     });
@@ -216,8 +214,6 @@ function addRemoteStreamMiniView(remoteStream){
     mainStreamId = streamId; // set the container stream id as the new main stream id
   });
 }
-
-
 
 
 function leaveChannel() {

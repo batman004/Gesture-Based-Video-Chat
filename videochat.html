@@ -29,11 +29,14 @@
 						</button>
 					</div> -->
           <div class="button-group">
-            <button type="button" onclick="init()">Start</button>
-            <button type="button" onclick="pause()">Stop</button>
+            <button type="button" onclick="init()">Start Gesture Control</button>
+            <button type="button" onclick="pause()">Stop Gesture Control</button>
           </div>
 				</div>
+				<div class="full-screen-wrapper">
 				<div id="full-screen-video"></div>
+			   </div>
+				<!-- <div id="center-screen-video"></div> -->
 				<div id="lower-video-bar" class="row fixed-bottom mb-1">
 					<div id="remote-streams-container" class="container col-9 ml-1">
 						<div id="remote-streams" class="row">
@@ -48,6 +51,7 @@
 							<i id="user-icon" class="fas fa-user"></i>
 						</div>
 						<div id="local-video" class="col p-0"></div>
+						<!-- <canvas id="video-canvas"></canvas> -->
 					</div>
 				</div>
 			</div>
@@ -87,10 +91,10 @@
     </div>
     </body>
 
-    <script src="AgoraRTCSDK-3.3.1.js"></script>
+    <script src="./js/AgoraRTCSDK-3.3.1.js"></script>
 
   <!-- CSS Includes go here -->
-  <link rel="stylesheet" type="text/css" href="./styles.css"/>
+  <link rel="stylesheet" type="text/css" href="./assets/css/styles.css"/>
   <!-- Bootstrap and Font Awesome CSS Libraries -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet">
@@ -124,8 +128,8 @@
 			initClientAndJoinChannel(agoraAppId, token, channelName, uid);
 		});
 	</script>
-	<script src="./ui.js"></script>
-	<script src="./agora.js"></script>
-  <script src="./pose.js"></script>
+	<script src="./js/ui.js"></script>
+	<script src="./js/agora.js"></script>
+  <script src="./js/pose.js"></script>
 
 </html>

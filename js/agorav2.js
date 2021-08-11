@@ -6,6 +6,18 @@ var screenVideoProfile = '480p_2'; // 640 × 480 @ 30fps
 
 let globalStream;
 
+let streamCanvas = document.createElement("canvas");
+streamCanvas.height = 1080;
+streamCanvas.width = 1920;
+userCameraHeight = 960;
+userCameraWidth = 540;
+streamCanvas.style =
+  "opacity:0;position:fixed;z-index:-1;left:-100000;top:-100000;";
+scaleFactor = 10;
+let streamCanvasType = streamCanvas.getContext("2d");
+
+
+
 // Agora RTC Client declare
 let client = AgoraRTC.createClient({
     mode: "rtc",
@@ -35,6 +47,10 @@ client.on('stream-published', function (evt) {
     console.log("Publish local stream successfully");
   });
   
+
+
+
+
 // connect remote streams (addding other users )
 
 client.on('stream-added', function (evt) {
@@ -97,6 +113,32 @@ client.on("peer-leave", function(evt) {
 });
 
 
+let cameraElement = document.createElement("video");
+cameraElement.style =
+  "opacity:0;position:fixed;z-index:-1;left:-100000;top:-100000;";
+document.body.appendChild(cameraElement);
+
+let screenElement = document.createElement("video");
+screenElement.style =
+  "opacity:0;position:fixed;z-index:-1;left:-100000;top:-100000;";
+document.body.appendChild(screenElement);
+
+
+function getUserVideo() {
+  return navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: false,
+  });
+}
+
+userVideoStream = await getUserVideo();
+cameraElement.srcObject = userVideoStream;
+cameraElement.play();
+
+camFrameRate = userVideoStream.getVideoTracks().getSettings().frameRate;
+
+console.log(camFrameRate)
+
 // show mute icon whenever a remote has muted their mic
 client.on("mute-audio", function (evt) {
     toggleVisibility('#' + evt.uid + '_mute', true);
@@ -144,7 +186,7 @@ function createCameraStream(uid) {
     localStream.init(function() {
       console.log("getUserMedia successfully");
   
-      localStream.play('local-video'); // play the given stream within the local-video div
+      localStream.play('video-canvas'); // play the given stream within the local-video div
   
       //take shared variable here; ref for local stream 
       globalStream=localStream;
@@ -194,73 +236,3 @@ client.leave(function() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-// initialising PoseNet script
-async function init() {
-
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
-
-    model = await tmPose.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
-
-    // Convenience function to setup a webcam
-    const size = 200;
-    const flip = true; // whether to flip the webcam
-    webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
-    await webcam.setup(); // request access to the webcam
-    await webcam.play();
-    // window.requestAnimationFrame(loop);
-
-    // change this (use frame instead of canvas ) take ss and run w frame 
-
-    // append/get elements to the DOM
-    const canvas = document.getElementById("canvas");
-    canvas.width = 200; canvas.height = 200;
-    ctx = canvas.getContext("2d");
-    labelContainer = document.getElementById("label-container");
-    for (let i = 0; i < maxPredictions; i++) { // and class labels
-        labelContainer.appendChild(document.createElement("div"));
-    }
-}
-
-async function predict() {
-
-    const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-    // run input through teachable machine classification model
-    const prediction = await model.predict(posenetOutput);
-
-    for (let i = 0; i < maxPredictions; i++) {
-        const classPrediction =
-            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
-    }
-
-    // finally draw the poses
-    drawPose(pose);
-}
-
-
-// function to define pose lines drawn on person for pose detection
-function drawPose(pose) {
-    if (webcam.canvas) {
-        ctx.drawImage(webcam.canvas, 0, 0);
-        // draw the keypoints and skeleton
-        if (pose) {
-            const minPartConfidence = 0.5;
-            tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
-            tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
-        }
-    }
-}

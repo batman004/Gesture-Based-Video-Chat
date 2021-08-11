@@ -15,10 +15,25 @@
   } */
   
   #full-screen-video {
-    position: absolute;
-    width: 100vw;
-    height: 100vh;
+    /* position: absolute; */
+    /* margin: 5vh 0; */
+    width: 50vw;
+    height: 50vh;
   }
+
+  .full-screen-wrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+  }
+
+  /* #center-screen-video {
+    position: absolute;
+    width: 50vw;
+    height: 50vh;
+  } */
+
   
   #lower-video-bar {
     height: 20vh;
