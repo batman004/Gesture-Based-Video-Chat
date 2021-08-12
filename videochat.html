@@ -1,0 +1,154 @@
+<html lang="en">
+
+<head>
+    <title>Agora Gesture Video Chat</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+
+<body>
+<div class="container-fluid p-4">
+    <div id="main-container">
+        <div id="buttons-container" class="row justify-content-center mt-3">
+            <div class="toggle-switch mt-2">
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="col-md-2 text-center p-4">
+                <button id="mic-btn" type="button" class="btn btn-block btn-dark btn-lg">
+                    <i id="mic-icon" class="fas fa-microphone"></i>
+                </button>
+            </div>
+            <div class="col-md-2 text-center p-4">
+                <button id="video-btn" type="button" class="btn btn-block btn-dark btn-lg">
+                    <i id="video-icon" class="fas fa-video"></i>
+                </button>
+            </div>
+            <div class="col-md-2 text-center p-4">
+                <button id="exit-btn" type="button" class="btn btn-block btn-danger btn-lg">
+                    <i id="exit-icon" class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+            <!-- <div class="col-md-2 text-center buttons p-4">
+                    <button id="gesture-btn"  type="button" class="btn btn-block btn-danger btn-lg">
+                        <i id="gesture-icon" class="fas fa-american-sign-language-interpreting" onclick="init()"></i>
+                    </button> -->
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="start()">Start Gesture Control</button>
+        <button type="button" class="btn btn-secondary" onclick="pause()">Stop Gesture Control</button>
+
+        <div class="full-screen-wrapper">
+            <div id="full-screen-video"></div>
+        </div>
+        <!-- <div id="center-screen-video"></div> -->
+        <div id="lower-video-bar" class="row fixed-bottom mb-1">
+            <div id="remote-streams-container" class="container col-9 ml-1">
+                <div id="remote-streams" class="row">
+                    <!-- insert remote streams dynamically -->
+                </div>
+            </div>
+            <div id="local-stream-container" class="col p-0">
+                <div id="mute-overlay" class="col">
+                    <i id="mic-icon" class="fas fa-microphone-slash"></i>
+                </div>
+                <div id="no-local-video" class="col text-center">
+                    <i id="user-icon" class="fas fa-user"></i>
+                </div>
+                <div id="local-video" class="col p-0"></div>
+            </div>
+        </div>
+        <!-- CANVAS -->
+        <div class="container d-flex justify-content-start">
+            <canvas id="video-canvas" class="dots_video"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalForm">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-center">
+                <h4 class="modal-title w-100 font-weight-bold">Join Channel</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body mx-3">
+                <div class="md-form mb-4">
+                    <input type="text" id="form-appid" class="form-control">
+                    <label for="form-appid">Agora AppId</label>
+                </div>
+                <div class="md-form mb-4">
+                    <input type="text" id="form-token" class="form-control">
+                    <label for="form-token">Agora Token</label>
+                </div>
+                <div class="md-form mb-4">
+                    <input type="text" id="form-channel" class="form-control">
+                    <label for="form-channel">Channel Name</label>
+                </div>
+                <div class="md-form mb-4">
+                    <input type="number" id="form-uid" class="form-control" value="1" data-decimals="0"/>
+                    <label for="form-uid">User ID</label>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button id="join-channel" class="btn btn-default">Join Channel</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="./js/AgoraRTCSDK-3.3.1.js"></script>
+
+<!-- CSS Includes go here -->
+<link rel="stylesheet" type="text/css" href="./assets/css/styles.css"/>
+<!-- Bootstrap and Font Awesome CSS Libraries -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+      integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+        crossorigin="anonymous"></script>
+<!-- JS Includes go here -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+<!-- tensorflow.js and posenet scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/pose@0.8/dist/teachablemachine-pose.min.js"></script>
+
+<script type="text/javascript">
+  $('#mic-btn').prop('disabled', true)
+  $('#video-btn').prop('disabled', true)
+  $('#exit-btn').prop('disabled', true)
+  $('#gesture-btn').prop('disabled', true)
+
+  $(document).ready(function () {
+    $('#modalForm').modal('show')
+  })
+</script>
+
+<script type="text/javascript">
+  // init the session when user clicks join btn
+  $('#join-channel').click(function (event) {
+    var agoraAppId = $('#form-appid').val()
+    var token = $('#form-token').val()
+    var channelName = $('#form-channel').val()
+    var uid = parseInt($('#form-uid').val())
+    $('#modalForm').modal('hide')
+    initClientAndJoinChannel(agoraAppId, token, channelName, uid)
+  })
+</script>
+
+<script src="./js/buttons.js"></script>
+<script src="./js/agora.js"></script>
+<script src="./js/pose.js"></script>
+
+</html>

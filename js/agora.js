@@ -3,8 +3,6 @@
  */
 
 // video profile settings
-
-
 var cameraVideoProfile = '480p_4'; // 640 × 480 @ 30fps  & 750kbs
 var screenVideoProfile = '480p_2'; // 640 × 480 @ 30fps
 
@@ -12,7 +10,7 @@ var screenVideoProfile = '480p_2'; // 640 × 480 @ 30fps
 var client = AgoraRTC.createClient({mode: 'rtc', codec: 'vp8'}); 
 
 // stream references (keep track of active streams) 
-var remoteStreams = {}; // remote streams obj struct [id : stream] 
+var remoteStreams = {}; 
 
 var localStreams = {
   camera: {
@@ -25,9 +23,14 @@ var localStreams = {
   }
 };
 
-AgoraRTC.Logger.enableLogUpload(); // auto upload logs
+// auto upload logs
+AgoraRTC.Logger.enableLogUpload(); 
 
-var mainStreamId; // reference to main stream
+// reference to main stream
+var mainStreamId; 
+
+// global varible to access the video stream 
+let globalStream;
 
 
 function initClientAndJoinChannel(agoraAppId, token, channelName, uid) {
@@ -86,12 +89,13 @@ client.on('stream-subscribed', function (evt) {
   }
 });
 
-// check if local video is present , then check id and console log
-
-// if($('local-video')){
-//   alert($('local-video').children())
-
+// function getUserVideo() {
+//   return navigator.mediaDevices.getUserMedia({
+//     video: true,
+//     audio: false,
+//   });
 // }
+
 
 
 // remove the remote-container when a user leaves the channel
@@ -163,7 +167,10 @@ function createCameraStream(uid) {
 
     localStream.play('local-video'); // play the given stream within the local-video div
 
-    // publish local stream
+    //take shared variable herer global stream = localstream   ref for local stream 
+    globalStream=localStream;
+
+
     client.publish(localStream, function (err) {
       console.log("[ERROR] : publish local stream error: " + err);
     });
@@ -173,7 +180,9 @@ function createCameraStream(uid) {
   }, function (err) {
     console.log("[ERROR] : getUserMedia failed", err);
   });
+
 }
+
 
 // check if stream exists and then run pose.js on it 
 
@@ -191,7 +200,7 @@ function addRemoteStreamMiniView(remoteStream){
       ),
       $('<div/>', {'id': 'agora_remote_' + streamId, 'class': 'remote-video'})
     )
-  );
+  ); 
   remoteStream.play('agora_remote_' + streamId); 
 
   var containerId = '#' + streamId + '_container';
@@ -205,6 +214,7 @@ function addRemoteStreamMiniView(remoteStream){
     mainStreamId = streamId; // set the container stream id as the new main stream id
   });
 }
+
 
 function leaveChannel() {
   

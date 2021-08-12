@@ -2,7 +2,15 @@
 
 ![](https://miro.medium.com/max/1400/1*XEu9XT-U1RKmuTtz8k3qMQ.png)
 
+
+This is a gesture based video chat web app that uses [Agora.io](https://www.agora.io) to set up a WebRTC interface, similar to Google Hangouts, Skype or whichever other video chat platform you prefer, but with the twist of AI! I have added gesture based control with uses computer vision algorithms such as posenet to detect a pose and trigger functions accordingly.
+
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/bbef2d65-738d-4409-834a-f6e760e9f8e6/deploy-status)](https://app.netlify.com/sites/posecall/deploys)
+
+
 This is a gesture based video chat web app that uses [Agora.io](https://www.agora.io) to set up a WebRTC interface, similar to Google Hangouts, Skype or whichever other video chat platform you prefer, but with the twist of Machine Learning! I have added gesture based control with uses a pre-trained model called PoseNet,for running real-time pose estimation in the browser using TensorFlow.js, and accordingly trigerring the call functions such as mute, unmute, camON and camOff
+
 ## Pre Requisites
 - [A simple web server](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server)
 - A developer account with [Agora.io](https://www.agora.io)
@@ -11,7 +19,7 @@ This is a gesture based video chat web app that uses [Agora.io](https://www.agor
 - An understand of how Bootstrap and JQuery functions
 
 ## Hosted Demo ##
-Coming Soon
+[PoseCall](posecall.netlify.app/)
 
 ## How to Run the Demo ##
 To test the video chat app, start a [simple web server](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server) with a secure connection _(https)_. 

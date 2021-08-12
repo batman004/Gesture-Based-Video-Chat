@@ -2,6 +2,12 @@
 
 let gesture_toggle = false
 
+
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})
+
+
 function enableUiControls(localStream) {
 
     $("#mic-btn").prop("disabled", false);
@@ -54,7 +60,7 @@ function enableUiControls(localStream) {
   }
 
   function toggleGesture() {
-    $("#gesture-icon").toggleClass('fad fa-american-sign-language-interpreting').toggleClass('fas fa-american-sign-language-interpreting'); 
+    $("#gesture-icon").toggleClass('fad fa-american-sign-language-interpreting').toggleClass('fa fa-hand-paper-o'); 
     if ($("#gesture-icon").hasClass('fad fa-american-sign-language-interpreting')) {
       init(); // fire up the pose.js script
       gesture_toggle = true
