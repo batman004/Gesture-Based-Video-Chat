@@ -1,8 +1,8 @@
-# Gesture-Based-Video-Chat
+# PoseCall (Gesture-Based-Video-Chat)
 
 ![](https://miro.medium.com/max/1400/1*XEu9XT-U1RKmuTtz8k3qMQ.png)
 
-
+## Introduction
 This is a gesture based video chat web app that uses [Agora.io](https://www.agora.io) to set up a WebRTC interface, similar to Google Hangouts, Skype or whichever other video chat platform you prefer, but with the twist of AI! I have added gesture based control with uses computer vision algorithms such as posenet to detect a pose and trigger functions accordingly.
 
 
@@ -27,15 +27,15 @@ To test the video chat app, start a [simple web server](https://developer.mozill
 ### Obtain an App ID
 To build and run the sample application, get an App ID:
 
-Create a developer account at agora.io. 
+1. Create a developer account at agora.io. 
 
-Once you finish the signup process, you will be redirected to the Dashboard.
+2. Once you finish the signup process, you will be redirected to the Dashboard.
 
-Navigate in the Dashboard tree on the left to Projects > Project List.
+3. Navigate in the Dashboard tree on the left to Projects > Project List.
 
-Save the App ID from the Dashboard for later use.
+4. Save the App ID from the Dashboard for later use.
 
-Generate a temp Access Token (valid for 24 hours) from dashboard page with given channel name, save for later use.
+5. Generate a temp Access Token (valid for 24 hours) from dashboard page with given channel name, save for later use.
 
 ### Next Steps
 1. open homepage.html and click on "Try Now".This will redirect you to the video call interface
