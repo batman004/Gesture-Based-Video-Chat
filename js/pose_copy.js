@@ -36,11 +36,24 @@ async function init_pose() {
     }
 }
 
+// make own function which calls draw function after a time interal (check webcam.update())
+
+
+// setInterval(() => {
+//     client.getLocalVideoStats((localVideoStats) => {
+//       for(var uid in localVideoStats){
+//         console.log(`Video CaptureFrameRate from ${uid}: ${localVideoStats[uid].CaptureFrameRate}`);
+//       }
+//     }
+//     )})
+
 async function loop(timestamp) {
     webcam.update(); // update the webcam frame
     await predict();
     window.requestAnimationFrame(loop);
 }
+
+
 
 async function predict() {
     // Prediction #1: run input through posenet
@@ -78,20 +91,20 @@ async function predict() {
     }
 
     if(count0>threshold){
-        localStream.unmuteVideo()
+        toggleVideo(globalStream)
 
     }
 
     else if (count1>threshold){
-        localStream.unmuteVideo()
+        toggleVideo(globalStream)
     }
 
     else if (count2>threshold){
-        localStream.muteAudio()
+        toggleMic(globalStream);
     }
 
     else if (count3>threshold){
-        localStream.unmuteAudio()
+        toggleMic(globalStream);
     }
    
 
@@ -102,6 +115,10 @@ async function predict() {
     drawPose(pose);
 }
 
+
+
+
+
 // function to pause the gesture control
 function pause(){
 
@@ -109,6 +126,13 @@ function pause(){
     webcam.stop()
 
 }
+
+
+// initialise agora element 
+// take ref of the local vid stream 
+
+
+
 
 function drawPose(pose) {
     if (webcam.canvas) {

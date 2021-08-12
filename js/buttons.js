@@ -2,6 +2,12 @@
 
 let gesture_toggle = false
 
+
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})
+
+
 function enableUiControls(localStream) {
 
     $("#mic-btn").prop("disabled", false);

@@ -1,107 +1,152 @@
-// More API functions here:
-// https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/pose
 
-// the link to your model provided by Teachable Machine export panel
+// the link to pre-trained model
 
-const URL = "https://teachablemachine.withgoogle.com/models/YnZ2KQft9/";
-let model, webcam, ctx, labelContainer, maxPredictions;
+const URL = 'https://teachablemachine.withgoogle.com/models/YnZ2KQft9/'
+let model, webcam, ctx, labelContainer, maxPredictions
 
-let run=false
+// flag variable to stop gesture control
+let run = true
 
-// check if video cam is on and window already created.
-// then access video stream and pass into predict
-// if confidence level of a particlar class >0.85, trigger function
+/* To be Fixed :
+check if video cam is on and window already created.
+then access video stream and pass into predict
+if confidence level of a particular class >0.85, trigger function */
 
-function mutemic() { 
-    localStream.muteAudio()
- }
-function unmutemic() { 
-    localStream.unmuteAudio();
- }
+async function init () {
+
+  if(!run){
+    return
+  }
+
+  const modelURL = URL + 'model.json'
+  const metadataURL = URL + 'metadata.json'
+
+  // load the model and metadata
+  // Note: the pose library adds a tmPose object to your window (window.tmPose)
+  model = await tmPose.load(modelURL, metadataURL)
+  maxPredictions = model.getTotalClasses()
+
+  // function to setup a webcam 
+  
+  const width = 400
+  const height = 400
+  const flip = true 
+  webcam = new tmPose.Webcam(width, height, flip) 
+  await webcam.setup() 
+  await webcam.play()
+  window.requestAnimationFrame(loop)
+
+/*Fix #2
+change this (use frames from localStream instead of canvas )*/
+
+  // get elements from the DOM
+  const canvas = document.getElementById('video-canvas')
+  canvas.width = width
+  canvas.height = height
+  ctx = canvas.getContext('2d')
+  // labelContainer = document.getElementById('label-container')
+  // for (let i = 0; i < maxPredictions; i++) { // and class labels
+  //     labelContainer.appendChild(document.createElement("div"));
+  // }
+
+}
+
+
+async function start() {
+
+  run=true;
+  await init()
+
+}
 
 
 
-async function init() {
+async function loop (timestamp) {
+  webcam.update() // update the webcam frame
+  await predict()
+  window.requestAnimationFrame(loop)
+}
 
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
+async function predict () {
+  //  run input through posenet
 
-    // load the model and metadata
-    // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-    // Note: the pose library adds a tmPose object to your window (window.tmPose)
-    model = await tmPose.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
+  /* Fix #3
+  pass in same canvas as video stream into estimatePose*/
 
-    // Convenience function to setup a webcam
-    const size = 200;
-    const flip = true; // whether to flip the webcam
-    webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
-    await webcam.setup(); // request access to the webcam
-    await webcam.play();
-    // window.requestAnimationFrame(loop);
+  const { pose, posenetOutput } = await model.estimatePose(webcam.canvas)
+  // Prediction 2: run input through teachable machine classification model
+  const prediction = await model.predict(posenetOutput)
 
-    // change this (use frame instead of canvas ) take ss and run w frame 
+  // Declared variables to keep track of each type of pose to trigger relevant function
 
-    // append/get elements to the DOM
-    const canvas = document.getElementById("local-stream-container");
-    canvas.width = 200; canvas.height = 200;
-    ctx = canvas.getContext("2d");
-    labelContainer = document.getElementById("label-container");
-    for (let i = 0; i < maxPredictions; i++) { // and class labels
-        labelContainer.appendChild(document.createElement("div"));
+  let muteThreshold        = 0,
+      unmuteThreshold      = 0,
+      muteVideoThreshold   = 0,
+      unmuteVideoThreshold = 0,
+      threshold            = 4
+
+  for (let i = 0; i < maxPredictions; i++) {
+    const classPrediction =
+            prediction[i].className +
+            ': ' +
+            prediction[i].probability.toFixed(2)
+
+    // console.log('  ' + classPrediction)
+
+    if (prediction[0].probability.toFixed(2) >= 0.85) {
+      muteThreshold++
+    } else if (prediction[1].probability.toFixed(2) >= 0.85) {
+      unmuteThreshold++
+    } else if (prediction[2].probability.toFixed(2) >= 0.85) {
+      muteVideoThreshold++
+    } else if (prediction[3].probability.toFixed(2) >= 0.85) {
+      unmuteVideoThreshold++
     }
-}
 
+    console.log(muteThreshold + '  ' + unmuteThreshold + '  ' + muteVideoThreshold + '  ' + unmuteVideoThreshold)
 
-//no need
-// async function loop(timestamp) {
-//     webcam.update(); // update the webcam frame
-//     await predict();
-//     window.requestAnimationFrame(loop);
-// }
+  }
 
-async function predict() {
-    // Prediction #1: run input through posenet
-    // estimatePose can take in an image, video or canvas html element
+  if (muteThreshold > threshold) {
+    globalStream.muteAudio()
+    unmuteThreshold = 0
+    // toggleMic(globalStream)
 
-    // pass doc by elelement instead
-    const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-    // Prediction 2: run input through teachable machine classification model
-    const prediction = await model.predict(posenetOutput);
+  } else if (unmuteThreshold > threshold) {
+    globalStream.unmuteAudio()
+    muteThreshold = 0
 
-    // create switchcase from posenet op 
+  } else if (muteVideoThreshold > threshold) {
+    globalStream.muteVideo()
+    unmuteVideoThreshold = 0
 
-    // trigger functions based on op's 
+  } else if (unmuteVideoThreshold > threshold) {
+    globalStream.unmuteVideo()
+    muteVideoThreshold = 0
+  }
 
-    // run func on same app id and channel 
-
-    for (let i = 0; i < maxPredictions; i++) {
-        const classPrediction =
-            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
-     
-}
-
-
-    // finally draw the poses
-    drawPose(pose);
+  // finally draw the poses
+  drawPose(pose)
 }
 
 // function to pause the gesture control
-function pause(){
+function pause () {
 
-    webcam.stop()
-
+  const canvas = document.getElementById('video-canvas')
+  ctx = canvas.getContext('2d')
+  ctx.clearRect(0,0,canvas.width,canvas.height)
+  webcam.stop()
+  run=false
 }
 
-function drawPose(pose) {
-    if (webcam.canvas) {
-        ctx.drawImage(webcam.canvas, 0, 0);
-        // draw the keypoints and skeleton
-        if (pose) {
-            const minPartConfidence = 0.5;
-            tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
-            tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
-        }
+function drawPose (pose) {
+  if (webcam.canvas) {
+    ctx.drawImage(webcam.canvas, 0, 0)
+    // draw the key points and skeleton
+    if (pose) {
+      const minPartConfidence = 0.5
+      tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx)
+      tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx)
     }
+  }
 }
