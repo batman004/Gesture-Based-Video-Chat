@@ -27,7 +27,7 @@ async function init () {
   maxPredictions = model.getTotalClasses()
 
   // function to setup a webcam 
-  
+
   const width = 400
   const height = 400
   const flip = true 
@@ -44,27 +44,21 @@ change this (use frames from localStream instead of canvas )*/
   canvas.width = width
   canvas.height = height
   ctx = canvas.getContext('2d')
-  // labelContainer = document.getElementById('label-container')
-  // for (let i = 0; i < maxPredictions; i++) { // and class labels
-  //     labelContainer.appendChild(document.createElement("div"));
-  // }
 
 }
 
 
-async function start() {
-
+function start() {
   run=true;
-  await init()
-
+  init()
 }
-
-
 
 async function loop (timestamp) {
+  if(run){
   webcam.update() // update the webcam frame
   await predict()
   window.requestAnimationFrame(loop)
+  
 }
 
 async function predict () {
@@ -85,6 +79,9 @@ async function predict () {
       unmuteVideoThreshold = 0,
       threshold            = 4
 
+  let isMuted = false,
+      isVideoOn = true
+
   for (let i = 0; i < maxPredictions; i++) {
     const classPrediction =
             prediction[i].className +
@@ -103,25 +100,32 @@ async function predict () {
       unmuteVideoThreshold++
     }
 
-    console.log(muteThreshold + '  ' + unmuteThreshold + '  ' + muteVideoThreshold + '  ' + unmuteVideoThreshold)
+    // console.log(muteThreshold + '  ' + unmuteThreshold + '  ' + muteVideoThreshold + '  ' + unmuteVideoThreshold)
 
   }
 
-  if (muteThreshold > threshold) {
-    globalStream.muteAudio()
+  if ((muteThreshold > threshold) && !isMuted) {
+    globalStreamLocal.muteAudio()
+    isMuted = !isMuted
+    // muteMic(globalStreamLocal)
     unmuteThreshold = 0
-    // toggleMic(globalStream)
-
-  } else if (unmuteThreshold > threshold) {
-    globalStream.unmuteAudio()
+  } else if ((unmuteThreshold > threshold) && !isMuted) {
+    globalStreamLocal.unmuteAudio()
+    isMuted = !isMuted
+    // unmuteMic(globalStreamLocal)
     muteThreshold = 0
 
-  } else if (muteVideoThreshold > threshold) {
-    globalStream.muteVideo()
+  } else if ((muteVideoThreshold > threshold) && isVideoOn) {
+    globalStreamLocal.muteVideo()
+    isVideoOn = !isVideoOn
+    // camOn(globalStreamLocal)
     unmuteVideoThreshold = 0
 
-  } else if (unmuteVideoThreshold > threshold) {
-    globalStream.unmuteVideo()
+  } else if ((unmuteVideoThreshold > threshold) && !isVideoOn) {
+    globalStreamLocal.unmuteVideo()
+    isVideoOn = !isVideoOn
+    console.log('unmute')
+    // camOff(globalStreamLocal)
     muteVideoThreshold = 0
   }
 
@@ -131,15 +135,19 @@ async function predict () {
 
 // function to pause the gesture control
 function pause () {
-
   const canvas = document.getElementById('video-canvas')
   ctx = canvas.getContext('2d')
-  ctx.clearRect(0,0,canvas.width,canvas.height)
+
+  if(webcam) {
   webcam.stop()
+  ctx.clearRect(0,0,canvas.width,canvas.height)
+  console.log('%cWebcam Stopped', 'color: red; font-size: 20px;')
+}
   run=false
 }
 
 function drawPose (pose) {
+
   if (webcam.canvas) {
     ctx.drawImage(webcam.canvas, 0, 0)
     // draw the key points and skeleton
@@ -149,4 +157,8 @@ function drawPose (pose) {
       tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx)
     }
   }
+  else{
+    ctx.clearRect(0,0,canvas.width,canvas.height)
+  }
+}
 }

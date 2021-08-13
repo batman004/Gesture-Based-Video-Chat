@@ -1,4 +1,4 @@
-// UI buttons
+// UI button functions 
 
 let gesture_toggle = false
 
@@ -7,6 +7,32 @@ $(function () {
   $('[data-toggle="popover"]').popover()
 })
 
+
+// logic for gesture toggle button
+
+const mic = document.getElementById('mic-btn')
+mic.addEventListener('click', handleMicClick)
+
+function handleMicClick() {
+  if (mic.classList.contains('btn-dark')) {
+    mic.classList.remove('btn-dark')
+    mic.classList.add('btn-danger')
+  } else {
+    mic.classList.add('btn-dark')
+    mic.classList.remove('btn-danger')
+  }
+}
+
+const toggle = document.getElementById('gesture-control-toggle')
+toggle.addEventListener('click', () => {
+  if (toggle.checked) {
+      start()
+      console.log('%cStarted', "color: green; font-size: 18px;")
+  } else {
+    pause()
+    console.log('%cPaused', "color: red; font-size: 18px;")
+  }
+})
 
 function enableUiControls(localStream) {
 
@@ -29,10 +55,12 @@ function enableUiControls(localStream) {
     });
   
     $("#exit-btn").click(function(){
-      console.log("so sad to see you leave the channel");
+      console.log("See you soon !");
       leaveChannel(); 
     });
   }
+
+
 
   
   function toggleBtn(btn){
@@ -48,7 +76,9 @@ function enableUiControls(localStream) {
   }
   
   function toggleMic(localStream) {
-    toggleBtn($("#mic-btn")); // toggle button colors
+    // toggleBtn($("#mic-btn")); // toggle button colors
+    // const mic = document.getElementById('mic-btn')
+    // toggleBtn(mic)
     $("#mic-icon").toggleClass('fa-microphone').toggleClass('fa-microphone-slash'); // toggle the mic icon
     if ($("#mic-icon").hasClass('fa-microphone')) {
       localStream.unmuteAudio(); // enable the local mic
@@ -59,20 +89,22 @@ function enableUiControls(localStream) {
     }
   }
 
-  function toggleGesture() {
-    $("#gesture-icon").toggleClass('fad fa-american-sign-language-interpreting').toggleClass('fa fa-hand-paper-o'); 
-    if ($("#gesture-icon").hasClass('fad fa-american-sign-language-interpreting')) {
-      init(); // fire up the pose.js script
-      gesture_toggle = true
 
-    } else {
-      pause(); //stop the posenet model
-
-    }
+  function unmuteMic(localStream){
+    toggleBtn($("#mic-btn"));
+    // toggleBtn($("#mic-btn"));
+    $("#mic-icon").toggleClass('fa-microphone').toggleClass('fa-microphone-slash');
+    // localStream.unmuteAudio(); // enable the local mic
+    toggleVisibility("#mute-overlay", false); // hide the muted mic icon
   }
 
+  function muteMic(localStream){
+    toggleBtn($("#mic-btn"));
+    $("#mic-icon").toggleClass('fa-microphone').toggleClass('fa-microphone-slash');
+    // localStream.muteAudio(); // disable the local mic
+    toggleVisibility("#mute-overlay", true); // show the muted mic icon
+  }
 
-  
   function toggleVideo(localStream) {
     toggleBtn($("#video-btn")); // toggle button colors
     $("#video-icon").toggleClass('fa-video').toggleClass('fa-video-slash'); // toggle the video icon
@@ -83,4 +115,19 @@ function enableUiControls(localStream) {
       localStream.muteVideo(); // disable the local video
       toggleVisibility("#no-local-video", true); // show the user icon when video is disabled
     }
+  }
+
+
+  function camOn(localStream){
+    toggleBtn($("#video-btn"));
+    console.log('%cCam On', 'color: green; font-size: 20px;')
+    // localStream.unmuteVideo(); // enable the local video
+    toggleVisibility("#no-local-video", false); // hide the user icon when video is enabled
+  }
+
+  function camOff(localStream){
+    toggleBtn($("#video-btn"));
+    console.log('%cCam Off', 'color: red; font-size: 20px;')
+    // localStream.muteVideo(); // disable the local video
+    toggleVisibility("#no-local-video", true); // show the user icon when video is enabled
   }
