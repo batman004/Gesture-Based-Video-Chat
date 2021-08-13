@@ -59,6 +59,7 @@ async function loop (timestamp) {
   await predict()
   window.requestAnimationFrame(loop)
   
+  }
 }
 
 async function predict () {
@@ -160,5 +161,4 @@ function drawPose (pose) {
   else{
     ctx.clearRect(0,0,canvas.width,canvas.height)
   }
-}
 }
