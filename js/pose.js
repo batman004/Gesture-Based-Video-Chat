@@ -7,7 +7,7 @@ let model, webcam, ctx, labelContainer, maxPredictions
 // flag variable to stop gesture control
 let run = true
 
-/* To be Fixed :
+/* Fix :
 check if video cam is on and window already created.
 then access video stream and pass into predict
 if confidence level of a particular class >0.85, trigger function */
@@ -49,8 +49,10 @@ change this (use frames from localStream instead of canvas )*/
 
 
 function start() {
+
   run=true;
   init()
+  alert("Gesture Control Activated ! ")
 }
 
 async function loop (timestamp) {
@@ -58,29 +60,26 @@ async function loop (timestamp) {
   webcam.update() // update the webcam frame
   await predict()
   window.requestAnimationFrame(loop)
-  
+  }
 }
 
+
 async function predict () {
+
+  // console.log("SEE THIS : " + globalStreamLocal.isPlaying())
+
+//globalStreamLocal.isPlaying()
+
+  if(!globalStreamLocal.isPlaying()){
+    pause()
+  }
+
   //  run input through posenet
 
-  /* Fix #3
-  pass in same canvas as video stream into estimatePose*/
 
   const { pose, posenetOutput } = await model.estimatePose(webcam.canvas)
   // Prediction 2: run input through teachable machine classification model
   const prediction = await model.predict(posenetOutput)
-
-  // Declared variables to keep track of each type of pose to trigger relevant function
-
-  let muteThreshold        = 0,
-      unmuteThreshold      = 0,
-      muteVideoThreshold   = 0,
-      unmuteVideoThreshold = 0,
-      threshold            = 4
-
-  let isMuted = false,
-      isVideoOn = true
 
   for (let i = 0; i < maxPredictions; i++) {
     const classPrediction =
@@ -91,50 +90,35 @@ async function predict () {
     // console.log('  ' + classPrediction)
 
     if (prediction[0].probability.toFixed(2) >= 0.85) {
-      muteThreshold++
+      globalStreamLocal.muteAudio()
+      muteMic()
+
+
     } else if (prediction[1].probability.toFixed(2) >= 0.85) {
-      unmuteThreshold++
+      globalStreamLocal.unmuteAudio()
+      unmuteMic()
+
+
     } else if (prediction[2].probability.toFixed(2) >= 0.85) {
-      muteVideoThreshold++
+      globalStreamLocal.muteVideo()
+      camOff()
+
+
     } else if (prediction[3].probability.toFixed(2) >= 0.85) {
-      unmuteVideoThreshold++
+      globalStreamLocal.unmuteVideo()
+      camOn()
+
     }
-
-    // console.log(muteThreshold + '  ' + unmuteThreshold + '  ' + muteVideoThreshold + '  ' + unmuteVideoThreshold)
-
-  }
-
-  if ((muteThreshold > threshold) && !isMuted) {
-    globalStreamLocal.muteAudio()
-    isMuted = !isMuted
-    // muteMic(globalStreamLocal)
-    unmuteThreshold = 0
-  } else if ((unmuteThreshold > threshold) && !isMuted) {
-    globalStreamLocal.unmuteAudio()
-    isMuted = !isMuted
-    // unmuteMic(globalStreamLocal)
-    muteThreshold = 0
-
-  } else if ((muteVideoThreshold > threshold) && isVideoOn) {
-    globalStreamLocal.muteVideo()
-    isVideoOn = !isVideoOn
-    // camOn(globalStreamLocal)
-    unmuteVideoThreshold = 0
-
-  } else if ((unmuteVideoThreshold > threshold) && !isVideoOn) {
-    globalStreamLocal.unmuteVideo()
-    isVideoOn = !isVideoOn
-    console.log('unmute')
-    // camOff(globalStreamLocal)
-    muteVideoThreshold = 0
   }
 
   // finally draw the poses
   drawPose(pose)
 }
 
+
+
 // function to pause the gesture control
-function pause () {
+function pause() {
   const canvas = document.getElementById('video-canvas')
   ctx = canvas.getContext('2d')
 
@@ -144,6 +128,8 @@ function pause () {
   console.log('%cWebcam Stopped', 'color: red; font-size: 20px;')
 }
   run=false
+  alert("Gesture Control Deactivated ! ")
+
 }
 
 function drawPose (pose) {
@@ -160,5 +146,4 @@ function drawPose (pose) {
   else{
     ctx.clearRect(0,0,canvas.width,canvas.height)
   }
-}
 }
