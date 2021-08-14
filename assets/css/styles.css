@@ -24,8 +24,8 @@
   #full-screen-video {
     /* position: absolute; */
     /* margin: 5vh 0; */
-    width: 30vw;
-    height: 30vh;
+    width: 40vw;
+    height: 40vh;
   }
 
   .full-screen-wrapper{
@@ -43,7 +43,7 @@
 
   
   #lower-video-bar {
-    height: 20vh;
+    height: 40vh;
   }
   
   #local-stream-container { 
@@ -62,7 +62,7 @@
   #local-video {
     position: absolute;
     z-index: 1;
-    height: 20vh;
+    height: 40vh;
     max-width: 100%;
   }
   
