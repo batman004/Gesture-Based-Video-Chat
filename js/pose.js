@@ -7,7 +7,7 @@ let model, webcam, ctx, labelContainer, maxPredictions
 // flag variable to stop gesture control
 let run = true
 
-/* To be Fixed :
+/* Fix :
 check if video cam is on and window already created.
 then access video stream and pass into predict
 if confidence level of a particular class >0.85, trigger function */
@@ -27,7 +27,7 @@ async function init () {
   maxPredictions = model.getTotalClasses()
 
   // function to setup a webcam 
-  
+
   const width = 400
   const height = 400
   const flip = true 
@@ -44,46 +44,42 @@ change this (use frames from localStream instead of canvas )*/
   canvas.width = width
   canvas.height = height
   ctx = canvas.getContext('2d')
-  // labelContainer = document.getElementById('label-container')
-  // for (let i = 0; i < maxPredictions; i++) { // and class labels
-  //     labelContainer.appendChild(document.createElement("div"));
-  // }
 
 }
 
 
-async function start() {
+function start() {
 
   run=true;
-  await init()
-
+  init()
+  alert("Gesture Control Activated ! ")
 }
 
-
-
 async function loop (timestamp) {
+  if(run){
   webcam.update() // update the webcam frame
   await predict()
   window.requestAnimationFrame(loop)
+  }
 }
 
+
 async function predict () {
+
+  // console.log("SEE THIS : " + globalStreamLocal.isPlaying())
+
+//globalStreamLocal.isPlaying()
+
+  if(!globalStreamLocal.isPlaying()){
+    pause()
+  }
+
   //  run input through posenet
 
-  /* Fix #3
-  pass in same canvas as video stream into estimatePose*/
 
   const { pose, posenetOutput } = await model.estimatePose(webcam.canvas)
   // Prediction 2: run input through teachable machine classification model
   const prediction = await model.predict(posenetOutput)
-
-  // Declared variables to keep track of each type of pose to trigger relevant function
-
-  let muteThreshold        = 0,
-      unmuteThreshold      = 0,
-      muteVideoThreshold   = 0,
-      unmuteVideoThreshold = 0,
-      threshold            = 4
 
   for (let i = 0; i < maxPredictions; i++) {
     const classPrediction =
@@ -94,52 +90,50 @@ async function predict () {
     // console.log('  ' + classPrediction)
 
     if (prediction[0].probability.toFixed(2) >= 0.85) {
-      muteThreshold++
+      globalStreamLocal.muteAudio()
+      muteMic()
+
+
     } else if (prediction[1].probability.toFixed(2) >= 0.85) {
-      unmuteThreshold++
+      globalStreamLocal.unmuteAudio()
+      unmuteMic()
+
+
     } else if (prediction[2].probability.toFixed(2) >= 0.85) {
-      muteVideoThreshold++
+      globalStreamLocal.muteVideo()
+      camOff()
+
+
     } else if (prediction[3].probability.toFixed(2) >= 0.85) {
-      unmuteVideoThreshold++
+      globalStreamLocal.unmuteVideo()
+      camOn()
+
     }
-
-    console.log(muteThreshold + '  ' + unmuteThreshold + '  ' + muteVideoThreshold + '  ' + unmuteVideoThreshold)
-
-  }
-
-  if (muteThreshold > threshold) {
-    globalStream.muteAudio()
-    unmuteThreshold = 0
-    // toggleMic(globalStream)
-
-  } else if (unmuteThreshold > threshold) {
-    globalStream.unmuteAudio()
-    muteThreshold = 0
-
-  } else if (muteVideoThreshold > threshold) {
-    globalStream.muteVideo()
-    unmuteVideoThreshold = 0
-
-  } else if (unmuteVideoThreshold > threshold) {
-    globalStream.unmuteVideo()
-    muteVideoThreshold = 0
   }
 
   // finally draw the poses
   drawPose(pose)
 }
 
-// function to pause the gesture control
-function pause () {
 
+
+// function to pause the gesture control
+function pause() {
   const canvas = document.getElementById('video-canvas')
   ctx = canvas.getContext('2d')
-  ctx.clearRect(0,0,canvas.width,canvas.height)
+
+  if(webcam) {
   webcam.stop()
+  ctx.clearRect(0,0,canvas.width,canvas.height)
+  console.log('%cWebcam Stopped', 'color: red; font-size: 20px;')
+}
   run=false
+  alert("Gesture Control Deactivated ! ")
+
 }
 
 function drawPose (pose) {
+
   if (webcam.canvas) {
     ctx.drawImage(webcam.canvas, 0, 0)
     // draw the key points and skeleton
@@ -148,5 +142,8 @@ function drawPose (pose) {
       tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx)
       tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx)
     }
+  }
+  else{
+    ctx.clearRect(0,0,canvas.width,canvas.height)
   }
 }

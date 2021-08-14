@@ -1,12 +1,21 @@
-// UI buttons
+// UI button functions 
 
-let gesture_toggle = false
+// logic for gesture toggle button
 
-
-$(function () {
-  $('[data-toggle="popover"]').popover()
+const toggle = document.getElementById('gesture-control-toggle')
+toggle.addEventListener('click', () => {
+  if (toggle.checked) {
+      start()
+      console.log('%cStarted', "color: green; font-size: 18px;")
+  } else {
+    pause()
+    var x = document.getElementById("video-canvas");  // Hide the canvas when not in use 
+    x.style.display = "none";
+    console.log('%cPaused', "color: red; font-size: 18px;")
+  }
 })
 
+// initially fade the buttons before joining the call
 
 function enableUiControls(localStream) {
 
@@ -24,21 +33,13 @@ function enableUiControls(localStream) {
       toggleVideo(localStream);
     });
 
-    $("#gesture-btn").click(function(){
-      toggleGesture();
-    });
-  
     $("#exit-btn").click(function(){
-      console.log("so sad to see you leave the channel");
+      console.log("See you soon !");
       leaveChannel(); 
     });
   }
 
-  
-  function toggleBtn(btn){
-    btn.toggleClass('btn-dark').toggleClass('btn-danger');
-  }
-  
+
   function toggleVisibility(elementID, visible) {
     if (visible) {
       $(elementID).attr("style", "display:block");
@@ -47,8 +48,9 @@ function enableUiControls(localStream) {
     }
   }
   
+
   function toggleMic(localStream) {
-    toggleBtn($("#mic-btn")); // toggle button colors
+
     $("#mic-icon").toggleClass('fa-microphone').toggleClass('fa-microphone-slash'); // toggle the mic icon
     if ($("#mic-icon").hasClass('fa-microphone')) {
       localStream.unmuteAudio(); // enable the local mic
@@ -59,22 +61,7 @@ function enableUiControls(localStream) {
     }
   }
 
-  function toggleGesture() {
-    $("#gesture-icon").toggleClass('fad fa-american-sign-language-interpreting').toggleClass('fa fa-hand-paper-o'); 
-    if ($("#gesture-icon").hasClass('fad fa-american-sign-language-interpreting')) {
-      init(); // fire up the pose.js script
-      gesture_toggle = true
-
-    } else {
-      pause(); //stop the posenet model
-
-    }
-  }
-
-
-  
   function toggleVideo(localStream) {
-    toggleBtn($("#video-btn")); // toggle button colors
     $("#video-icon").toggleClass('fa-video').toggleClass('fa-video-slash'); // toggle the video icon
     if ($("#video-icon").hasClass('fa-video')) {
       localStream.unmuteVideo(); // enable the local video
@@ -83,4 +70,44 @@ function enableUiControls(localStream) {
       localStream.muteVideo(); // disable the local video
       toggleVisibility("#no-local-video", true); // show the user icon when video is disabled
     }
+  }
+
+
+  function unmuteMic(){
+    if($("#mic-icon").hasClass('fa-microphone-slash')){
+      $("#mic-icon").toggleClass('fa-microphone-slash').toggleClass('fa-microphone');}
+      else{
+        $("#mic-icon").addClass('fa-microphone')
+      }
+    toggleVisibility("#mute-overlay", false); // hide the muted mic icon
+  }
+
+  function muteMic(){
+    if($("#mic-icon").hasClass('fa-microphone')){
+      $("#mic-icon").toggleClass('fa-microphone').toggleClass('fa-microphone-slash');}
+      else{
+        $("#mic-icon").addClass('fa-microphone-slash')
+      }
+
+    toggleVisibility("#mute-overlay", true); // show the muted mic icon
+  }
+
+  function camOn(){
+   if($("#video-icon").hasClass('fa-video-slash')){
+    $("#video-icon").toggleClass('fa-video-slash').toggleClass('fa-video');}
+    else{
+      $("#video-icon").addClass('fa-video')
+    }
+    // console.log('%cCam On', 'color: green; font-size: 20px;')
+    toggleVisibility("#no-local-video", false); // hide the user icon when video is enabled
+  }
+
+  function camOff(){
+    if($("#video-icon").hasClass('fa-video')){
+    $("#video-icon").toggleClass('fa-video').toggleClass('fa-video-slash');}
+    else{
+      $("#video-icon").addClass('fa-video-slash')
+    }
+    // console.log('%cCam Off', 'color: red; font-size: 20px;')
+    toggleVisibility("#no-local-video", true); // show the user icon when video is enabled
   }

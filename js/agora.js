@@ -24,13 +24,13 @@ var localStreams = {
 };
 
 // auto upload logs
-AgoraRTC.Logger.enableLogUpload(); 
+// AgoraRTC.Logger.enableLogUpload(); 
 
 // reference to main stream
 var mainStreamId; 
 
-// global varible to access the video stream 
-let globalStream;
+// global varible to access the local video stream 
+let globalStreamLocal,globalStreamRemote;
 
 
 function initClientAndJoinChannel(agoraAppId, token, channelName, uid) {
@@ -73,6 +73,7 @@ client.on('stream-subscribed', function (evt) {
   if( $('#full-screen-video').is(':empty') ) { 
     mainStreamId = remoteId;
     remoteStream.play('full-screen-video');
+    globalStreamRemote=remoteStreams[mainStreamId]  // accesing main remote stream
     $('#main-stats-btn').show();
     $('#main-stream-stats-btn').show();
   } else if (remoteId == 49024) {
@@ -88,14 +89,6 @@ client.on('stream-subscribed', function (evt) {
     addRemoteStreamMiniView(remoteStream);
   }
 });
-
-// function getUserVideo() {
-//   return navigator.mediaDevices.getUserMedia({
-//     video: true,
-//     audio: false,
-//   });
-// }
-
 
 
 // remove the remote-container when a user leaves the channel
@@ -119,7 +112,7 @@ client.on("peer-leave", function(evt) {
   }
 });
 
-// show mute icon whenever a remote has muted their mic
+// show mute/unmute icon whenever a remote has muted their mic
 client.on("mute-audio", function (evt) {
   toggleVisibility('#' + evt.uid + '_mute', true);
 });
@@ -133,7 +126,7 @@ client.on("mute-video", function (evt) {
   var remoteId = evt.uid;
   // if the main user stops their video select a random user from the list
   if (remoteId != mainStreamId) {
-    // if not the main vidiel then show the user icon
+    // if not the main video then show the user icon
     toggleVisibility('#' + remoteId + '_no-video', true);
   }
 });
@@ -168,7 +161,7 @@ function createCameraStream(uid) {
     localStream.play('local-video'); // play the given stream within the local-video div
 
     //take shared variable herer global stream = localstream   ref for local stream 
-    globalStream=localStream;
+    globalStreamLocal=localStream;
 
 
     client.publish(localStream, function (err) {
@@ -184,7 +177,7 @@ function createCameraStream(uid) {
 }
 
 
-// check if stream exists and then run pose.js on it 
+// future fix : check if stream exists and then run pose.js on it 
 
 // REMOTE STREAMS UI
 function addRemoteStreamMiniView(remoteStream){
@@ -239,6 +232,3 @@ function leaveChannel() {
   });
 }
 
-
-
-// id="local-video" local video creation div

@@ -1,150 +1,164 @@
-// the link to the model by Teachable Machine
-const URL = "https://teachablemachine.withgoogle.com/models/YnZ2KQft9/";
-let model, webcam, ctx, labelContainer, maxPredictions;
 
-let run_gesture=false
+// the link to pre-trained model
 
-function init(run_gesture){
-    if(run_gesture){
-    await init_pose()
-    }
-}
+const URL = 'https://teachablemachine.withgoogle.com/models/YnZ2KQft9/'
+let model, webcam, ctx, labelContainer, maxPredictions
 
-async function init_pose() {
+// flag variable to stop gesture control
+let run = true
 
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
+/* To be Fixed :
+check if video cam is on and window already created.
+then access video stream and pass into predict
+if confidence level of a particular class >0.85, trigger function */
 
-    // load the model and metadata
+async function init () {
 
-    model = await tmPose.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
+  if(!run){
+    return
+  }
 
-    // Convenience function to setup a webcam
-    
-    window.requestAnimationFrame(loop);
+  const modelURL = URL + 'model.json'
+  const metadataURL = URL + 'metadata.json'
 
-    // change this (use frame instead of canvas ) take ss and run w frame 
+  // load the model and metadata
+  // Note: the pose library adds a tmPose object to your window (window.tmPose)
+  model = await tmPose.load(modelURL, metadataURL)
+  maxPredictions = model.getTotalClasses()
 
-    // append/get elements to the DOM
-    const canvas = document.getElementById("canvas");
-    canvas.width = size; canvas.height = size;
-    ctx = canvas.getContext("2d");
-    labelContainer = document.getElementById("label-container");
-    for (let i = 0; i < maxPredictions; i++) { // and class labels
-        labelContainer.appendChild(document.createElement("div"));
-    }
-}
+  // function to setup a webcam 
 
-// make own function which calls draw function after a time interal (check webcam.update())
+  const width = 400
+  const height = 400
+  const flip = true 
+  webcam = new tmPose.Webcam(width, height, flip) 
+  await webcam.setup() 
+  await webcam.play()
+  window.requestAnimationFrame(loop)
 
+/*Fix #2
+change this (use frames from localStream instead of canvas )*/
 
-// setInterval(() => {
-//     client.getLocalVideoStats((localVideoStats) => {
-//       for(var uid in localVideoStats){
-//         console.log(`Video CaptureFrameRate from ${uid}: ${localVideoStats[uid].CaptureFrameRate}`);
-//       }
-//     }
-//     )})
+  // get elements from the DOM
+  const canvas = document.getElementById('video-canvas')
+  canvas.width = width
+  canvas.height = height
+  ctx = canvas.getContext('2d')
 
-async function loop(timestamp) {
-    webcam.update(); // update the webcam frame
-    await predict();
-    window.requestAnimationFrame(loop);
 }
 
 
-
-async function predict() {
-    // Prediction #1: run input through posenet
-    // estimatePose can take in an image, video or canvas html element
-
-    const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-    // Prediction 2: run input through teachable machine classification model
-    const prediction = await model.predict(posenetOutput);
-   // create switchcase from posenet op 
-
-    // trigger functions based on op's 
-
-    // run func on same app id and channel 
-
-    for (let i = 0; i < maxPredictions; i++) {
-        const classPrediction =
-            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-        labelContainer.childNodes[i].innerHTML = classPrediction;
-
-     // trigger video call functions based on count of probability of a
-     // particular class crossing the threshold 
-
-     let count0=0,count1=0,count2=0,count3=0,threshold=4;
-    if (prediction[0].probability.toFixed(2) >= 0.75){
-        count0++;
-    }
-    else if(prediction[1].probability.toFixed(2) >= 0.75) {
-        count1++;
-    }
-    else if(prediction[2].probability.toFixed(2) >= 0.75) {
-        count2++;
-    }
-    else if(prediction[3].probability.toFixed(2) >= 0.75) {
-        count3++;
-    }
-
-    if(count0>threshold){
-        toggleVideo(globalStream)
-
-    }
-
-    else if (count1>threshold){
-        toggleVideo(globalStream)
-    }
-
-    else if (count2>threshold){
-        toggleMic(globalStream);
-    }
-
-    else if (count3>threshold){
-        toggleMic(globalStream);
-    }
-   
-
-
-    }
-
-    // finally draw the poses
-    drawPose(pose);
+function start() {
+  run=true;
+  init()
 }
 
+async function loop (timestamp) {
+  if(run){
+  webcam.update() // update the webcam frame
+  await predict()
+  window.requestAnimationFrame(loop)
+  
+  }
+}
 
+async function predict () {
+  //  run input through posenet
 
+  /* Fix #3
+  pass in same canvas as video stream into estimatePose*/
 
+  const { pose, posenetOutput } = await model.estimatePose(webcam.canvas)
+  // Prediction 2: run input through teachable machine classification model
+  const prediction = await model.predict(posenetOutput)
+
+  // Declared variables to keep track of each type of pose to trigger relevant function
+
+  let muteThreshold        = 0,
+      unmuteThreshold      = 0,
+      muteVideoThreshold   = 0,
+      unmuteVideoThreshold = 0,
+      threshold            = 4
+
+  let isMuted = false,
+      isVideoOn = true
+
+  for (let i = 0; i < maxPredictions; i++) {
+    const classPrediction =
+            prediction[i].className +
+            ': ' +
+            prediction[i].probability.toFixed(2)
+
+    // console.log('  ' + classPrediction)
+
+    if (prediction[0].probability.toFixed(2) >= 0.85) {
+      muteThreshold++
+    } else if (prediction[1].probability.toFixed(2) >= 0.85) {
+      unmuteThreshold++
+    } else if (prediction[2].probability.toFixed(2) >= 0.85) {
+      muteVideoThreshold++
+    } else if (prediction[3].probability.toFixed(2) >= 0.85) {
+      unmuteVideoThreshold++
+    }
+
+    // console.log(muteThreshold + '  ' + unmuteThreshold + '  ' + muteVideoThreshold + '  ' + unmuteVideoThreshold)
+
+  }
+
+  if ((muteThreshold > threshold) && !isMuted) {
+    globalStreamLocal.muteAudio()
+    isMuted = !isMuted
+    // muteMic(globalStreamLocal)
+    unmuteThreshold = 0
+  } else if ((unmuteThreshold > threshold) && !isMuted) {
+    globalStreamLocal.unmuteAudio()
+    isMuted = !isMuted
+    // unmuteMic(globalStreamLocal)
+    muteThreshold = 0
+
+  } else if ((muteVideoThreshold > threshold) && isVideoOn) {
+    globalStreamLocal.muteVideo()
+    isVideoOn = !isVideoOn
+    // camOn(globalStreamLocal)
+    unmuteVideoThreshold = 0
+
+  } else if ((unmuteVideoThreshold > threshold) && !isVideoOn) {
+    globalStreamLocal.unmuteVideo()
+    isVideoOn = !isVideoOn
+    console.log('unmute')
+    // camOff(globalStreamLocal)
+    muteVideoThreshold = 0
+  }
+
+  // finally draw the poses
+  drawPose(pose)
+}
 
 // function to pause the gesture control
-function pause(){
+function pause () {
+  const canvas = document.getElementById('video-canvas')
+  ctx = canvas.getContext('2d')
 
-    // await webcam.setup();
-    webcam.stop()
-
+  if(webcam) {
+  webcam.stop()
+  ctx.clearRect(0,0,canvas.width,canvas.height)
+  console.log('%cWebcam Stopped', 'color: red; font-size: 20px;')
+}
+  run=false
 }
 
+function drawPose (pose) {
 
-// initialise agora element 
-// take ref of the local vid stream 
-
-
-
-
-function drawPose(pose) {
-    if (webcam.canvas) {
-        // ctx.drawImage(webcam.canvas, 0, 0);
-        streamCanvasType.drawImage(cameraElement,0,0,streamCanvas.width,streamCanvas.height);
-        // draw the keypoints and skeleton
-        if (pose) {
-            const minPartConfidence = 0.5;
-            tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
-            tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
-        }
+  if (webcam.canvas) {
+    ctx.drawImage(webcam.canvas, 0, 0)
+    // draw the key points and skeleton
+    if (pose) {
+      const minPartConfidence = 0.5
+      tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx)
+      tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx)
     }
+  }
+  else{
+    ctx.clearRect(0,0,canvas.width,canvas.height)
+  }
 }
-
- 
