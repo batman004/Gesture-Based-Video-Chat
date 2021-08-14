@@ -1,6 +1,7 @@
 # PoseCall (Gesture-Based-Video-Chat)
 
-![](https://miro.medium.com/max/1400/1*XEu9XT-U1RKmuTtz8k3qMQ.png)
+![](https://miro.medium.com/max/1400/0*eTXq7zxO44dTIu-K.png)
+
 
 ## Introduction
 This is a gesture based video chat web app that uses [Agora.io](https://www.agora.io) to set up a WebRTC interface, similar to Google Hangouts, Skype or whichever other video chat platform you prefer, but with the twist of AI! I have added gesture based control with uses computer vision algorithms such as posenet to detect a pose and trigger functions accordingly.
