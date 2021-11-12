@@ -12,7 +12,7 @@ This is a gesture based video chat web app that uses [Agora.io](https://www.agor
 
 ## Pre Requisites
 - [A simple web server](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/set_up_a_local_testing_server)
-- A developer account with [Agora.io](https://www.agora.io)
+- A developer account with [agora.io](https://console.agora.io/)
 - An understanding of HTML/CSS/JS 
 - A basic understanding of how PoseNet functions work 
 - An understand of how Bootstrap and JQuery functions
