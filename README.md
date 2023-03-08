@@ -1,6 +1,8 @@
 # PoseCall (Gesture-Based-Video-Chat)
 
-![](https://miro.medium.com/max/1400/0*eTXq7zxO44dTIu-K.png)
+![](https://user-images.githubusercontent.com/58564635/223690137-1d863120-0442-471d-93e3-440e9c4f69bf.jpg)
+
+![](https://user-images.githubusercontent.com/58564635/223690390-8b4d6bb9-7ebc-4908-b0e2-6f602f3cdd23.jpg)
 
 
 ## Introduction
